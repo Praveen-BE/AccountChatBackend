@@ -22,11 +22,11 @@ export const validateSignUpData = (req) => {
 };
 
 export const validateSignInData = (req) => {
-  const { emailId, password } = req.body;
+  const { emailId, confirmPassword } = req.body;
 
   if (!validator.isEmail(emailId)) {
     throw new Error("Email is Not Valid !...");
-  } else if (!validator.isStrongPassword(password)) {
+  } else if (!validator.isStrongPassword(confirmPassword)) {
     throw new Error("Enter the Valid Password !...");
   }
 };

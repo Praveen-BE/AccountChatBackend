@@ -3,14 +3,16 @@ import { validateSignInData, validateSignUpData } from "../utils/validation.js";
 
 import bcrypt from "bcrypt";
 import accountChatUsers from "../models/chatUser.js";
-// import { getJWT, validatePassword } from "../models/chatUser.js";
 
 const authRouter = express.Router();
 
-authRouter.post("/signup", async (req, res) => {
+authRouter.post("/auth/signup", async (req, res) => {
   try {
     //validation
+
     validateSignUpData(req);
+
+    // console.log(req.body);
 
     const { emailId, mobileCountryCode, mobileNumber, confirmPassword } =
       req.body;
@@ -26,6 +28,7 @@ authRouter.post("/signup", async (req, res) => {
 
     const saveUser = await userData.save();
     const token = await saveUser.getJWT();
+    // console.log("auth retrive Token :- " + token);
     res.cookie("token", token, {
       expires: new Date(Date.now() + 7 * 3600000),
     });
@@ -33,10 +36,12 @@ authRouter.post("/signup", async (req, res) => {
     res.json({
       message: "User Added Successfully",
       data: {
-        _id: userData._id,
+        userId: userData._id,
+        emailId: userData.emailId,
         mobileCountryCode: userData.mobileCountryCode,
         mobileNumber: userData.mobileNumber,
-        emailId: userData.emailId,
+        photoUrl: userData.photoUrl,
+        about: userData.about,
       },
     });
   } catch (err) {
@@ -44,34 +49,50 @@ authRouter.post("/signup", async (req, res) => {
   }
 });
 
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/auth/login", async (req, res) => {
   try {
+    // console.log(req.body);
     validateSignInData(req);
 
-    const { emailId, password } = req.body;
+    const { emailId, confirmPassword } = req.body;
+    // console.log("This " + req.body);
     const user = await accountChatUsers.findOne({ emailId: emailId });
+    // console.log(user);
     if (!user) {
       throw new Error("Invalid Credintials !...");
     }
-    const isPasswordValid = await user.validatePassword(password);
+    const isPasswordValid = await user.validatePassword(confirmPassword);
     if (isPasswordValid) {
       const token = await user.getJWT();
       if (!token) {
         return res.status(401).send("Please Login !...");
       }
+      // console.log("auth retrive Token :- " + token);
       res.cookie("token", token, {
         expires: new Date(Date.now() + 7 * 3600000),
       });
-      res.json(user);
+
+      res.json({
+        message: "User Added Successfully",
+        data: {
+          userId: userData._id,
+          emailId: userData.emailId,
+          mobileCountryCode: userData.mobileCountryCode,
+          mobileNumber: userData.mobileNumber,
+          photoUrl: userData.photoUrl,
+          about: userData.about,
+        },
+      });
     } else {
       throw new Error("Invalid Credintials...");
     }
   } catch (err) {
-    res.status(400).send("Error : " + err.message);
+    // console.error(err);
+    res.status(400).send("Error : Hello" + err);
   }
 });
 
-authRouter.post("/logout", async (req, res) => {
+authRouter.post("/auth/logout", async (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
   });

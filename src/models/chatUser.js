@@ -3,6 +3,9 @@ import { defaultProfileURL, defaultAbout } from "../constant.js";
 import jwt from "jsonwebtoken";
 import validator from "validator";
 import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const userSchema = new mongoose.Schema(
   {
@@ -65,11 +68,11 @@ const userSchema = new mongoose.Schema(
 
 userSchema.methods.getJWT = async function () {
   const user = this;
-
+  // console.log("This is Key word " + process.env.JWT_KEY_WORD);
   const token = await jwt.sign({ _id: user._id }, process.env.JWT_KEY_WORD, {
     expiresIn: "1d",
   });
-
+  // console.log("This is Token :- " + token);
   return token;
 };
 
