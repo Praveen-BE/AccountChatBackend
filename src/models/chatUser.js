@@ -7,6 +7,12 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const contactsSchema = new mongoose.Schema({
+  savedName: { type: String, require: true },
+  mobileCountryCode: { type: String, require: true },
+  mobileNumber: { type: String, require: true },
+});
+
 const userSchema = new mongoose.Schema(
   {
     firstName: {
@@ -31,11 +37,11 @@ const userSchema = new mongoose.Schema(
       },
     },
     mobileCountryCode: {
-      type: Number,
+      type: String,
       require: true,
     },
     mobileNumber: {
-      type: Number,
+      type: String,
       unique: true,
       require: true,
       index: true,
@@ -49,7 +55,7 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
-    photoUrl: {
+    profilePhotoUrl: {
       type: String,
       default: defaultProfileURL,
       validate(value) {
@@ -62,17 +68,28 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: defaultAbout,
     },
+    contacts: [contactsSchema],
+    privacy: {
+      profilePhoto: {
+        type: String,
+        enum: ["everyone", "myContacts", "nobody"],
+        default: "everyone",
+      },
+      about: {
+        type: String,
+        enum: ["everyone", "myContacts", "nobody"],
+        default: "everyone",
+      },
+    },
   },
   { timestamps: true }
 );
 
 userSchema.methods.getJWT = async function () {
   const user = this;
-  // console.log("This is Key word " + process.env.JWT_KEY_WORD);
   const token = await jwt.sign({ _id: user._id }, process.env.JWT_KEY_WORD, {
     expiresIn: "1d",
   });
-  // console.log("This is Token :- " + token);
   return token;
 };
 

@@ -11,22 +11,24 @@ profileRouter.get("/profile/user", userAuth, async (req, res) => {
     emailId,
     mobileCountryCode,
     mobileNumber,
-    photoUrl,
+    profilePhotoUrl,
     about,
+    contacts,
+    privacy,
   } = req.user;
-  const { token } = req.cookies;
-  // console.log(token);
-
+  // console.log(req.user);
   res.json({
     data: {
       userId: _id,
-      firstName,
-      lastName,
+      firstName: firstName || "First Name",
+      lastName: lastName || " ",
       emailId,
       mobileCountryCode,
       mobileNumber,
-      photoUrl,
+      profilePhotoUrl,
       about,
+      contacts,
+      privacy,
     },
   });
 });

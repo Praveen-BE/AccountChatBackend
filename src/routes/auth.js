@@ -3,6 +3,7 @@ import { validateSignInData, validateSignUpData } from "../utils/validation.js";
 
 import bcrypt from "bcrypt";
 import accountChatUsers from "../models/chatUser.js";
+import userAuth from "../middlewares/auth.js";
 
 const authRouter = express.Router();
 
@@ -37,11 +38,15 @@ authRouter.post("/auth/signup", async (req, res) => {
       message: "User Added Successfully",
       data: {
         userId: userData._id,
+        firstName: userData.firstName || "First Name",
+        lastName: userData.lastName || " ",
         emailId: userData.emailId,
         mobileCountryCode: userData.mobileCountryCode,
         mobileNumber: userData.mobileNumber,
-        photoUrl: userData.photoUrl,
+        profilePhotoUrl: userData.profilePhotoUrl,
         about: userData.about,
+        contacts: userData.contacts,
+        privacy: userData.privacy,
       },
     });
   } catch (err) {
@@ -56,14 +61,14 @@ authRouter.post("/auth/login", async (req, res) => {
 
     const { emailId, confirmPassword } = req.body;
     // console.log("This " + req.body);
-    const user = await accountChatUsers.findOne({ emailId: emailId });
+    const userData = await accountChatUsers.findOne({ emailId: emailId });
     // console.log(user);
-    if (!user) {
+    if (!userData) {
       throw new Error("Invalid Credintials !...");
     }
-    const isPasswordValid = await user.validatePassword(confirmPassword);
+    const isPasswordValid = await userData.validatePassword(confirmPassword);
     if (isPasswordValid) {
-      const token = await user.getJWT();
+      const token = await userData.getJWT();
       if (!token) {
         return res.status(401).send("Please Login !...");
       }
@@ -76,11 +81,15 @@ authRouter.post("/auth/login", async (req, res) => {
         message: "User Added Successfully",
         data: {
           userId: userData._id,
+          firstName: userData.firstName || "First Name",
+          lastName: userData.lastName || " ",
           emailId: userData.emailId,
           mobileCountryCode: userData.mobileCountryCode,
           mobileNumber: userData.mobileNumber,
-          photoUrl: userData.photoUrl,
+          profilePhotoUrl: userData.profilePhotoUrl,
           about: userData.about,
+          contacts: userData.contacts,
+          privacy: userData.privacy,
         },
       });
     } else {
@@ -92,11 +101,11 @@ authRouter.post("/auth/login", async (req, res) => {
   }
 });
 
-authRouter.post("/auth/logout", async (req, res) => {
+authRouter.get("/auth/logout", userAuth, async (req, res) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
   });
-  res.send("Logout Successfully...");
+  res.json({ message: "Logout Successfully..." });
 });
 
 export default authRouter;
