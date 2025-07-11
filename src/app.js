@@ -4,6 +4,7 @@ import profileRouter from "./routes/profile.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import userRouter from "./routes/user.js";
 
 dotenv.config();
 const app = express();
@@ -22,5 +23,6 @@ app.use(cookieParser());
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
+app.use("/", userRouter);
 
 export default app;
